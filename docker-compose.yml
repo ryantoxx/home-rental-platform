@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  gateway:
+    build:
+      dockerfile: Dockerfile
+      context: gateway/
+    ports:
+      - "4000:4000"
+    depends_on:
+      - user-service
+      - booking-service
+    networks:
+      - booking-network
+
+  user-service:
+    build: 
+      dockerfile: Dockerfile
+      context: user-service/
+    ports:
+      - "5000:5000"
+    networks:
+      - booking-network
+
+  user-service-db:
+    image: postgres:17
+    environment:
+      - POSTGRES_DB=user_service_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=nikita
+    volumes:
+      - ./user-service-db/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - booking-network
+      
+  booking-service:
+    build:
+      dockerfile: Dockerfile
+      context: booking-service/
+    ports:
+      - "5001:5001"
+    networks:
+      - booking-network
+
+  booking-service-db:
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=nikita
+      - MYSQL_DATABASE=bookingdb
+    volumes:
+      - ./booking-service-db/init-booking.sql:/docker-entrypoint-initdb.d/init-booking.sql
+    ports:
+      - "3307:3306"
+    networks:
+      - booking-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - booking-network
+    
+networks:
+  booking-network:
+    driver: bridge
+
+      
