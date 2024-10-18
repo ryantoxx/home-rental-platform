@@ -20,3 +20,11 @@ class Booking(db.Model):
     status = db.Column(db.String(50), default="confirmed")
 
     property = db.relationship('Property', backref='bookings')
+
+class Notification(db.Model):
+    __tablename__ = 'notification'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    property_id = db.Column(db.Integer, db.ForeignKey('properties.id'), nullable=False)
+
+    property = db.relationship('Property', backref=db.backref('notification', lazy=True))

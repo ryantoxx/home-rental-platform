@@ -1,9 +1,112 @@
 from flask import request, jsonify
-from models import Property, Booking
-from flask_jwt_extended import jwt_required
+from models import Property, Booking, Notification
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
-from __main__ import app, db, cache
+from __main__ import app, db, cache, socketio
+from flask_socketio import emit, join_room, leave_room
 import json
+import eventlet
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+@socketio.on('get-notification')
+@jwt_required()
+def handle_get_notification(data):
+    user_id = get_jwt_identity()
+    property_id = data.get('property_id')
+
+    if property_id:
+
+        existing_notification = Notification.query.filter_by(user_id=user_id, property_id=property_id).first()
+
+        if existing_notification:
+            emit('notification_response', {'message': f'Already watching notification for property with ID:{property_id}'})
+            return  
+
+        room = f'room {property_id}'
+
+        notification = Notification(user_id=user_id, property_id=property_id)
+        db.session.add(notification)
+        db.session.commit()
+
+        emit('notification_response', {'message': f'Subscribed to notification for property with ID:{property_id}'})
+    else:
+        emit('notification_response', {'message': 'Error'})
+        
+@socketio.on('stop-notification')
+@jwt_required()
+def handle_stop_notification(data):
+    user_id = get_jwt_identity()
+    property_id = data.get('property_id')
+
+    if property_id:
+        notification = Notification.query.filter_by(user_id=user_id, property_id=property_id).first()
+
+        if notification:
+            db.session.delete(notification)
+            db.session.commit()
+
+            room = f'room {property_id}'
+            leave_room(room)
+
+            emit('stop_notification_response', {'message': f'Stopped getting notification for property with ID: {property_id}'})
+        else:
+            emit('stop_notification_response', {'message': 'No notification found for this property id'})
+    else:
+        emit('stop_notification_response', {'message': 'Error'})
+
+@socketio.on('join-room')
+@jwt_required()
+def handle_join_room(data):
+    user_id = get_jwt_identity()
+    property_id = data.get('property_id')
+
+    if property_id:
+        existing_notification = Notification.query.filter_by(user_id=user_id, property_id=property_id).first()
+
+        if existing_notification:
+            room = f'room {property_id}'
+            join_room(room)
+            emit('join_response', {'message': f'Connected to room {room} for notifications.'})
+        else:
+            emit('join_response', {'message': f'User {user_id} is has not yet joined a room to get notifications {property_id}.'})
+    else:
+        emit('join_response', {'message': 'Error'})
+        
+@socketio.on('leave-room')
+@jwt_required()
+def handle_leave_room(data):
+    user_id = get_jwt_identity()
+    property_id = data.get('property_id')
+
+    if property_id:
+        notification = Notification.query.filter_by(user_id=user_id, property_id=property_id).first()
+
+        if notification:
+            room = f'room {property_id}'
+            leave_room(room)
+            emit('leave_response', {'message': f'Left from room {room}.'})
+            print(f"User {user_id} left room {room}.")
+        else:
+            emit('leave_response', {'message': f'User {user_id} did not get notification for property with ID: {property_id}.'})
+    else:
+        emit('leave_response', {'message': 'Error'})
+
+@socketio.on('broadcast_notification')
+def handle_notification(data):
+    property_id = data.get('property_id')
+    notification = data.get('notification')
+    if property_id and notification:
+        room = f'room {property_id}'
+        emit('notification_update', {'update': notification}, room=room)
+    else:
+        emit('notification_update', {'message': 'Error'})
 
 # Root route for testing
 @app.route('/')
@@ -14,11 +117,11 @@ def home():
 def seed_properties():
     if Property.query.count() == 0: 
         property_data = [
-            Property(name='Modern City Apartment', location='New York City NY', price_per_night=120.00, availability=False),
+            Property(name='Modern City Apartment', location='New York City NY', price_per_night=120.00, availability=True),
             Property(name='Oceanfront Luxury Villa', location='Malibu, CA', price_per_night=450.00, availability=True),
-            Property(name='Rustic Mountain Cabin', location='Aspen, CO', price_per_night=180.00, availability=False),
+            Property(name='Rustic Mountain Cabin', location='Aspen, CO', price_per_night=180.00, availability=True),
             Property(name='Charming Country Cottage', location='Charleston, SC', price_per_night=90.00, availability=True),
-            Property(name='Downtown Penthouse', location='Chicago, IL', price_per_night=600.00, availability=False)
+            Property(name='Downtown Penthouse', location='Chicago, IL', price_per_night=600.00, availability=True)
         ]
 
         db.session.add_all(property_data)
@@ -78,11 +181,28 @@ def create_booking():
     property.availability = False
     db.session.commit()
 
+    # Update the cache with the new property availability status
+    cache.delete('properties')
+
+    properties = Property.query.all()
+    result = []
+    for prop in properties:
+        result.append({
+            "propertyId": prop.id,
+            "name": prop.name,
+            "location": prop.location,
+            "pricePerNight": prop.price_per_night,
+            "availability": prop.availability
+        })
+
+    cache.setex('properties', 300, json.dumps(result))
+
     return jsonify({
         'bookingId': new_booking.id,
         'message': 'Booking confirmed',
         'totalPrice': total_price
     }), 201
+
 
 @app.route('/api/booking/<string:booking_id>', methods=['GET'])
 @jwt_required()
@@ -105,10 +225,26 @@ def get_booking(booking_id):
 def cancel_booking(booking_id):
     booking = Booking.query.get(booking_id)
     property = Property.query.get(booking.property_id)
+
     if not booking:
-        return jsonify({'message': 'Booking not found'}), 404    
+        return jsonify({'message': 'Booking not found'}), 404
+
     booking.status = 'CANCELED'
     property.availability = True
     db.session.commit()
+    cache.delete('properties')
 
-    return jsonify({'message': 'Booking cancelled'}), 200
+    properties = Property.query.all()
+    result = []
+    for prop in properties:
+        result.append({
+            "propertyId": prop.id,
+            "name": prop.name,
+            "location": prop.location,
+            "pricePerNight": prop.price_per_night,
+            "availability": prop.availability
+        })
+
+    cache.setex('properties', 300, json.dumps(result))
+
+    return jsonify({'message': 'Booking cancelled and property availability updated in cache'}), 200
