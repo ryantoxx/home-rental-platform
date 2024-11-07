@@ -25,7 +25,7 @@ Microservices deliver flexibility and agility through modular architecture, fost
 
 - **Booking Service**: manages property bookings and real-time interactions.
 
-![Microservice Arhitecture](imgs/arhitecture.png)
+![Microservice Arhitecture](imgs/updated_arhitecture.png)
 
 ### Updated features:
 
