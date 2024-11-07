@@ -73,9 +73,9 @@ def handle_join_room(data):
         if existing_notification:
             room = f'room {property_id}'
             join_room(room)
-            emit('join_response', {'message': f'Connected to room {room} for notifications.'})
+            emit('join_response', {'message': f'Connected to {room} for notifications.'})
         else:
-            emit('join_response', {'message': f'User {user_id} is has not yet joined a room to get notifications {property_id}.'})
+            emit('join_response', {'message': f'User {user_id} is not subscribed to get notifications for room: {property_id}.'})
     else:
         emit('join_response', {'message': 'Error'})
         
@@ -91,7 +91,7 @@ def handle_leave_room(data):
         if notification:
             room = f'room {property_id}'
             leave_room(room)
-            emit('leave_response', {'message': f'Left from room {room}.'})
+            emit('leave_response', {'message': f'Left from {room}.'})
             print(f"User {user_id} left room {room}.")
         else:
             emit('leave_response', {'message': f'User {user_id} did not get notification for property with ID: {property_id}.'})
@@ -113,7 +113,7 @@ def handle_notification(data):
 def home():
     return 'Booking Service is running!'
 
-@app.route('/seed-properties', methods=['POST'])
+@app.route('/seed-properties', methods=['GET'])
 def seed_properties():
     if Property.query.count() == 0: 
         property_data = [
@@ -204,7 +204,7 @@ def create_booking():
     }), 201
 
 
-@app.route('/api/booking/<string:booking_id>', methods=['GET'])
+@app.route('/api/booking/<int:booking_id>', methods=['GET'])
 @jwt_required()
 def get_booking(booking_id):
     booking = Booking.query.filter_by(id=booking_id).first()

@@ -36,6 +36,17 @@ router.get('/properties', async (req, res) => {
     }
 });
 
+router.get('/seed-properties', async (req, res) => {
+    try {
+        const SERVICE_2_URL = await getServiceUrl('booking-service');
+        const response = await axios.get(`${SERVICE_2_URL}/seed-properties`);
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response?.status || 500).send(error.response?.data || { message: 'Request failed' });
+    }
+});
+
+
 router.get('/booking/:bookingId', async (req, res) => {
     try {
         const SERVICE_2_URL = await getServiceUrl('booking-service');

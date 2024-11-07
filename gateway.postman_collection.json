@@ -1,0 +1,247 @@
+{
+	"info": {
+		"_postman_id": "02ae67ee-0f77-468e-830a-1f7722e95570",
+		"name": "gateway",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29606415"
+	},
+	"item": [
+		{
+			"name": "api/users/login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"nikita@gmail.com\",\r\n    \"password\": \"nikita\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users/register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"nikita\",\r\n    \"email\": \"nikita@gmail.com\",\r\n    \"password\": \"nikita\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users/allusers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/users/profile",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyNzk3NDkyMCwianRpIjoiYjFkNTJkY2UtY2YwMS00NjNjLTg5NDktNTU0YmYxNjU5OTMyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MywibmJmIjoxNzI3OTc0OTIwLCJjc3JmIjoiNmM4YmJiYTUtZGMwOC00M2NhLTlkODQtMTZiOWNjMWJiMmE2IiwiZXhwIjoxNzI3OTc4NTIwfQ.M2FYi9Ono_7i2VYidBB5AWybvyxj4FTMOj3zJxYOgGo",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/profile",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/bookings/book",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyNzk3NDkyMCwianRpIjoiYjFkNTJkY2UtY2YwMS00NjNjLTg5NDktNTU0YmYxNjU5OTMyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MywibmJmIjoxNzI3OTc0OTIwLCJjc3JmIjoiNmM4YmJiYTUtZGMwOC00M2NhLTlkODQtMTZiOWNjMWJiMmE2IiwiZXhwIjoxNzI3OTc4NTIwfQ.M2FYi9Ono_7i2VYidBB5AWybvyxj4FTMOj3zJxYOgGo",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": 3,\r\n    \"propertyId\": 2,\r\n    \"startDate\": \"2024-10-10\",\r\n    \"endDate\": \"2024-10-15\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5001/api/book",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"book"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/bookings/properties",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5001/api/properties",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"properties"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/bookings/cancel-booking/",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyNzk3NDkyMCwianRpIjoiYjFkNTJkY2UtY2YwMS00NjNjLTg5NDktNTU0YmYxNjU5OTMyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MywibmJmIjoxNzI3OTc0OTIwLCJjc3JmIjoiNmM4YmJiYTUtZGMwOC00M2NhLTlkODQtMTZiOWNjMWJiMmE2IiwiZXhwIjoxNzI3OTc4NTIwfQ.M2FYi9Ono_7i2VYidBB5AWybvyxj4FTMOj3zJxYOgGo",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5001/api/cancel-booking/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"cancel-booking",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/bookings/booking/",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "seed",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5001/seed-properties",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"seed-properties"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TEST-TIMEOUT",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "SD-Status Endpoint",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Gateway-Status Endpoint",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}

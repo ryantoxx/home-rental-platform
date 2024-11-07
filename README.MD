@@ -1,5 +1,4 @@
 ## Home Rental Platform
-
 ### 1. Application Suitability 
 
 Microservices deliver flexibility and agility through modular architecture, fostering faster development cycles and easier maintenance.
@@ -28,11 +27,21 @@ Microservices deliver flexibility and agility through modular architecture, fost
 
 ![Microservice Arhitecture](imgs/arhitecture.png)
 
+### Updated features:
+
+1. **Redis Clustering**: Redis clustering is used to enhance the caching layer by distributing data across multiple nodes, allowing for greater scalability and high availability, ensuring faster data retrieval and load balancing.
+
+2. **ELK Stack**: The ELK Stack (Elasticsearch, Logstash, and Kibana) is implemented to collect, store, and visualize logs and metrics from services, aiding in real-time monitoring, troubleshooting, and analysis of the system’s performance.
+
+3. **Database Replication**: Database replication in PostgreSQL involves creating replica nodes of the user data database, improving data availability, load balancing read operations, and enhancing fault tolerance.
+
+4. **ETL Service**: The ETL (Extract, Transform, Load) service is used to transfer booking and user data from the MySQL and PostgreSQL databases into a data warehouse, supporting data analytics and reporting by consolidating and preparing data for analysis.
+
 ### 3. Technology Stack and Communication Patterns
 
 - **Api Gateway**: Node.js/Express.js
 - **User Service**: Python with Flask and PostgreSQL
-- **Booking Service**: Python with Flask and PostgreSQL
+- **Booking Service**: Python with Flask and MySQL
 - **Communication Patterns**: REST
 - **Cache**: REDIS
 
@@ -40,119 +49,282 @@ Microservices deliver flexibility and agility through modular architecture, fost
 
 #### **User Service:**
 
-- Database: Each user has unique data stored in the PostgreSQL DB
-
-**1. POST** /register ->  Registers a new user
+**1. POST** /api/users/login
+- **Description:** Authenticates a user and provides a JWT token if credentials are valid.
+- **Request Body**
 ```
 {
-  "username": "string",
-  "email": "string",
-  "password": "string"
+  "email": "john@gmail.com",
+  "password": "password"
 }
 ```
-**Response**
+**Successful Response 200 OK**
 ```
 {
-  "userId": "string",
-  "message": "User successfully registered"
-}
-```
-
-**2. POST** /login -> Logs in a user
-```
-{
-  "email": "string",
-  "password": "string"
-}
-```
-**Response**
-```
-{
-  "token": "string",
+  "token": "<JWT_TOKEN>",
   "message": "Login successful"
 }
 ```
-
-**3. GET** /profile - > Retrieves user's profile information. The request header will require an authorization token(JWT)
-
+**Failure Response 401 Unauthorized**
 ```
 {
-  "userId": "string",
-  "username": "string",
-  "email": "string",
-  "registeredDate": "string"
+  "error": "Invalid credentials"
 }
 ```
 
+**2. POST** /api/users/register
+- **Description:** Registers a new user with a username, email, and password.
+- **Request Body:**
+```
+{
+  "username": "username",
+  "email": "user@example.com",
+  "password": "password"
+}
+
+```
+**Successful Response 201 Created**
+```
+{
+  "message": "User registered successfully"
+}
+
+```
+**Failure Response 409 Conflict**
+```
+{
+  "error": "User already exists" 
+}
+
+```
+
+**3. GET** /api/users/allusers
+- **Description:** Retrieves a list of all registered users.
+- **Successful Response 200 Ok**
+```
+{
+  [
+  {
+    "id": 1,
+    "username": "user1",
+    "email": "user1@gmail.com"
+  },
+  {
+    "id": 2,
+    "username": "user2",
+    "email": "user2@gmail.com"
+  }
+]
+}
+```
+**4. GET** /api/users/profile
+- **Description:** Returns profile information of the authenticated user.
+- **Successful Response 200 Ok**
+```
+{
+  "id": 3,
+  "username": "john",
+  "email": "john@gmail.com"
+}
+
+```
 #### **Booking Service:**
 
-**1. GET** /properties - > Retrieves the list of available properties
-
-```
-  {
-    "propertyId": "string",
-    "name": "string",
-    "location": "string",
-    "pricePerNight": "number",
-    "availability": "boolean"
-  }
-```
-
-**2. POST** /book -> Creates a new booking
-
+**1. POST** /api/bookings/book
+- **Description:** Creates a new booking for a specified user and property within a date range.
+- **Request Body**
 ```
 {
-  "propertyId": "string",
-  "userId": "string",
-  "startDate": "string",
-  "endDate": "string"
+  "userId": 3,
+  "propertyId": 2,
+  "startDate": "2024-10-10",
+  "endDate": "2024-10-15"
 }
 ```
-**Response** 
+- **Successful Response 201 Created**
 ```
 {
-  "bookingId": "string",
+  "bookingId": 3,
   "message": "Booking confirmed",
-  "totalPrice": "number"
+  "totalPrice": 6300
 }
 ```
-
-**3. GET** /booking {bookingID} -> Retrieves the details of a specific booking
-
+- **Failure Response 404 Not Found**
 ```
 {
-  "bookingId": "string",
-  "propertyId": "string",
-  "userId": "string",
-  "startDate": "string",
-  "endDate": "string",
-  "status": "string"
+    "message": "Property not found or not available"
 }
 ```
 
-**4. POST** /cancel -> Cancels an existing booking
+**2. GET** /api/bookings/properties
+- **Description:** Retrieves a list of available properties for booking.
+**Successful Response 200 Ok**
 ```
 {
-  "bookingId": "string"
+  [
+    {
+        "availability": true,
+        "location": "New York City NY",
+        "name": "Modern City Apartment",
+        "pricePerNight": 120,
+        "propertyId": 1
+    },
+    {
+        "availability": true,
+        "location": "Malibu, CA",
+        "name": "Oceanfront Luxury Villa",
+        "pricePerNight": 450,
+        "propertyId": 2
+    },
+    {
+        "availability": true,
+        "location": "Aspen, CO",
+        "name": "Rustic Mountain Cabin",
+        "pricePerNight": 180,
+        "propertyId": 3
+    },
+    {
+        "availability": true,
+        "location": "Charleston, SC",
+        "name": "Charming Country Cottage",
+        "pricePerNight": 90,
+        "propertyId": 4
+    },
+    {
+        "availability": false,
+        "location": "Chicago, IL",
+        "name": "Downtown Penthouse",
+        "pricePerNight": 600,
+        "propertyId": 5
+    }
+]
 }
+
 ```
-**Response**
+**3. DELETE** /api/cancel-booking/{int:booking_id}
+- **Description:** Cancels an existing booking with the specified ID.
+- **Successful Response 200 Ok**
 ```
 {
-  "message": "Booking cancelled"
+  "message": "Booking cancelled successfully"
 }
 ```
 
-**5. GET** -> Retrieves the real-time availability of properties using the lobby mechanic. Opens a websocket to provide real-time availability updates
+**4. GET** /api/bookings/booking/{id}
+- **Description:** Retrieves details of a specific booking by booking ID.
+- **Successful Response 200 Ok**
+```
+{
+  "bookingId": 1,
+  "userId": 3,
+  "propertyId": 2,
+  "startDate": "2024-10-10",
+  "endDate": "2024-10-15"
+}
+```
+**Failure Response 404 Not Found**
+```
+{
+  "error": "Booking not found"
+}
 
 ```
-  {
-    "propertyId": "string",
-    "availableSlots": "number"
-  }
+
+### Web Socket Connection
 ```
+ws://localhost:5001 - Users connect to the websocket
+```
+There are several events that could happen:
+- get-notification
+- stop-notification
+- join-room
+- leave-room
+- broadcast_notification
+
+**1. get-notification** 
+- **Description:** Subscribes a user to receive notifications for a specific property based on the property ID.
+
+- **Successful Response:** 
+  - Emits notification_response with message "Subscribed to notification for property with ID:{property_id}".
+  - Emits notification_response with message "Already watching notification for property with ID:{property_id}" if the user is already subscribed.
+
+- **Failure Response:**  Emits notification_response with message "Error" if the property ID is missing.
+
+**2. stop-notification** 
+- **Description:** Unsubscribes a user from notifications for a specific property
+- **Successful Response:** 
+  - Emits stop_notification_response with message "Stopped getting notification for property with ID: {property_id}"
+
+- **Failure Response:**  
+  - Emits stop_notification_response with message "No notification found for this property id" if no subscription exists
+  - Emits stop_notification_response with message "Error" if the property ID is missing
+
+**3. join-room** 
+- **Description:** Connects the user to a WebSocket room for receiving notifications about a specific property
+- **Successful Response:** 
+  - Emits join_response with message "Connected to room {property_id} for notifications" if subscribed
+
+- **Failure Response:**  
+  - Emits join_response with message "User {user_id} is not subscribed to get notifications for room: {property_id}" if no subscription is found
+  - Emits join_response with message "Error" if the property ID is missing
+
+**4. leave-room** 
+- **Description:** Disconnects the user from the WebSocket room associated with a specific property
+- **Successful Response:** 
+  - Emits leave_response with message "Left from room {property_id}"
+
+- **Failure Response:**  
+  - Emits leave_response with message "User {user_id} did not get notification for property with ID: {property_id}" if the user is not subscribed
+  - Emits leave_response with message "Error" if the property ID is missing
+
+**5. broadcast-notification** 
+- **Description:** Sends a notification update to all users in a specific room based on property ID
+- **Successful Response:** 
+  - Emits notification_update with message containing "update" for the notification
+
+- **Failure Response:**  
+  - Emits notification_update with message "Error" if the property ID or notification data is missing
+
+### Running & Deploying
+#### Installation
+
+- **1. Clone the Repository**
+
+```
+git clone <repository_url>
+cd <repository_directory>
+```
+- **2. Set Up a Virtual Environment**
+```
+python3 -m venv venv
+venv\Scripts\activate 
+```
+- **3. Install Python Dependencies**
+```
+pip install -r requirements.txt
+```
+
+#### Deployment
+
+- **1. Run Docker Compose**
+
+Build the images and start the containers for all microservices.
+```
+docker-compose up --build
+```
+
+Check whether services are running
+```
+docker ps
+```
+
+Stop the containers
+
+```
+docker-compose down
+```
+
 ### 5. Deployment and Scalling 
-
 For this project I'll consider using containerization tool like Docker. It will allow me to package my microservices into containers that include the application code, libraries, and dependancies. Thus, each container runs in its own container, isolated from others. Also horizontal scalling will be used for this project.
 
 
