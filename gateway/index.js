@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const bookingRoutes = require('./routes/bookingService');
 const userRoutes = require('./routes/userService');
-const serviceDiscoveryRoutes = require('./serviceRegistry');
+const { router: serviceDiscoveryRoutes} = require('./serviceRegistry');
 
 const app = express();
 const PORT = process.env.PORT || 4000;

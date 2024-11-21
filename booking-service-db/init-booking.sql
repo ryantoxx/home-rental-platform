@@ -1,4 +1,4 @@
-\c bookingdb
+USE bookingdb;
 
 CREATE TABLE IF NOT EXISTS properties (
     id INT AUTO_INCREMENT PRIMARY KEY,

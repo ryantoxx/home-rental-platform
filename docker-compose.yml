@@ -8,19 +8,60 @@ services:
     ports:
       - "4000:4000"
     depends_on:
-      - user-service
-      - booking-service
+      - user-service-1
+      - user-service-2
+      - user-service-3
+      - booking-service-1
+      - booking-service-2
+      - booking-service-3
     networks:
       - booking-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      service_type: gateway
 
-  user-service:
+  user-service-1:
     build: 
       dockerfile: Dockerfile
       context: user-service/
     ports:
       - "5000:5000"
+    depends_on:
+      - user-service-db
     networks:
       - booking-network
+    labels:
+      service_type: user-service
+      instance: user-service-1
+
+  user-service-2:
+    build: 
+      dockerfile: Dockerfile
+      context: user-service/
+    ports:
+      - "5001:5000"
+    depends_on:
+      - user-service-db
+    networks:
+      - booking-network
+    labels:
+      service_type: user-service
+      instance: user-service-2
+
+  user-service-3:
+    build: 
+      dockerfile: Dockerfile
+      context: user-service/
+    ports:
+      - "5002:5000"
+    depends_on:
+      - user-service-db
+    networks:
+      - booking-network
+    labels:
+      service_type: user-service
+      instance: user-service-3
 
   user-service-db:
     image: postgres:17
@@ -34,15 +75,51 @@ services:
       - "5432:5432"
     networks:
       - booking-network
+    labels:
+      - user-service-db
       
-  booking-service:
+  booking-service-1:
     build:
       dockerfile: Dockerfile
       context: booking-service/
     ports:
-      - "5001:5001"
+      - "5003:5003"
+    depends_on:
+      - booking-service-db
     networks:
       - booking-network
+    labels:
+      service_type: booking-service
+      instance: booking-service-1
+
+  booking-service-2:
+    build:
+      dockerfile: Dockerfile
+      context: booking-service/
+    ports:
+      - "5004:5003"
+    depends_on:
+      - booking-service-db
+    networks:
+      - booking-network
+    labels:
+      service_type: booking-service
+      instance: booking-service-2
+
+  booking-service-3:
+    build:
+      dockerfile: Dockerfile
+      context: booking-service/
+    ports:
+      - "5005:5003"
+    depends_on:
+      - booking-service-db
+    networks:
+      - booking-network
+    labels:
+      service_type: booking-service
+      instance: booking-service-3
+    
 
   booking-service-db:
     image: mysql:8
@@ -55,6 +132,8 @@ services:
       - "3307:3306"
     networks:
       - booking-network
+    labels:
+      service_type: booking-service-db
 
   redis:
     image: redis:alpine
@@ -62,6 +141,8 @@ services:
       - "6379:6379"
     networks:
       - booking-network
+    labels:
+      service_type: redis
     
 networks:
   booking-network:
