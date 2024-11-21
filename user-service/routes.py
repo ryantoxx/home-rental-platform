@@ -76,4 +76,16 @@ def profile():
         return jsonify(profile_info), 200
     else:
         return jsonify({'message': 'User not found'}), 404
+    
+
+@app.route('/api/test', methods=['GET'])
+def test_circuit():
+    try:
+        # Simulating an error by raising an exception
+        raise Exception("Simulated service failure for circuit breaker testing")
+    except Exception as e:
+        # Log the error if needed
+        app.logger.error(f"Test circuit endpoint failed: {e}")
+        # Return a JSON response with a 500 status code to indicate a failure
+        return jsonify({'message': str(e)}), 500
 
