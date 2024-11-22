@@ -31,7 +31,7 @@ Microservices deliver flexibility and agility through modular architecture, fost
 
 1. **Redis Clustering**: Redis clustering is used to enhance the caching layer by distributing data across multiple nodes, allowing for greater scalability and high availability, ensuring faster data retrieval and load balancing.
 
-2. **ELK Stack**: Prometheus is an open-source toolkit for monitoring and alerting, designed to collect and store time-series data from multiple sources using a powerful query language, PromQL. Grafana, also open-source, is a visualization tool that integrates with Prometheus (and other data sources) to create custom dashboards and alerts based on real-time metrics. Together, they form a comprehensive monitoring stack where Prometheus gathers and stores data, and Grafana visualizes it for analysis and alerting.
+2. **Prometheus & Grafana**: Prometheus is an open-source toolkit for monitoring and alerting, designed to collect and store time-series data from multiple sources using a powerful query language, PromQL. Grafana, also open-source, is a visualization tool that integrates with Prometheus (and other data sources) to create custom dashboards and alerts based on real-time metrics. Together, they form a comprehensive monitoring stack where Prometheus gathers and stores data, and Grafana visualizes it for analysis and alerting.
 
 3. **Database Replication**: Database replication in PostgreSQL involves creating replica nodes of the user data database, improving data availability, load balancing read operations, and enhancing fault tolerance.
 

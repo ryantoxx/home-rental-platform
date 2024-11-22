@@ -16,7 +16,7 @@ def create_app():
 
     limiter = Limiter(
         key_func=get_remote_address,
-        default_limits=["5 per minute", "1 per second"],
+        default_limits=["60 per minute"],
     )
     limiter.init_app(app)
 
@@ -24,7 +24,6 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    # Initialize Prometheus metrics
     metrics = PrometheusMetrics(app)
     import routes
     jwt = JWTManager(app)
