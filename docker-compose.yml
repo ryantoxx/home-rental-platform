@@ -120,7 +120,6 @@ services:
       service_type: booking-service
       instance: booking-service-3
     
-
   booking-service-db:
     image: mysql:8
     environment:
@@ -143,6 +142,64 @@ services:
       - booking-network
     labels:
       service_type: redis
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - gateway
+      - user-service-1
+      - user-service-2
+      - user-service-3
+      - booking-service-1
+      - booking-service-2
+      - booking-service-3
+    networks:
+      - booking-network
+    labels:
+      service_type: prometheus
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    environment:
+      - GF_LOG_LEVEL=silent
+      - GF_SECURITY_ADMIN_USER=user
+      - GF_SECURITY_ADMIN_PASSWORD=user
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - booking-network
+    labels:
+      service_type: grafana
+
+  # --------------------------
+  # prometheus:
+  #   image: prom/prometheus
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     - booking-network
+
+  # grafana:
+  #   image: grafana/grafana
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - prometheus
+  #   networks:
+  #     - booking-network
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin  
+  #   container_name: grafana
     
 networks:
   booking-network:

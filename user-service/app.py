@@ -3,6 +3,7 @@ from models import db
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from prometheus_flask_exporter import PrometheusMetrics  # New import
 
 def create_app():
     app = Flask(__name__)
@@ -11,10 +12,10 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config["JWT_SECRET_KEY"] = "my-secret"
 
-    db.init_app(app)  
+    db.init_app(app)
 
     limiter = Limiter(
-        key_func = get_remote_address,
+        key_func=get_remote_address,
         default_limits=["5 per minute", "1 per second"],
     )
     limiter.init_app(app)
@@ -23,6 +24,8 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
+    # Initialize Prometheus metrics
+    metrics = PrometheusMetrics(app)
     import routes
     jwt = JWTManager(app)
     app.run(debug=True, host='0.0.0.0')

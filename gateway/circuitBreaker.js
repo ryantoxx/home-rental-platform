@@ -45,7 +45,7 @@ const circuitBreaker = async (serviceName, requestFn) => {
             } catch (error) {
                 instanceFailures++;
                 serviceState.failures++;
-                console.error(`Attempt ${retries + 1}, instance ${instance.instanceName}, failure ${instanceFailures}:`, error.message);
+                console.error(`Instance ${instance.instanceName}, failure ${instanceFailures}:`, error.message);
 
                 if (instanceFailures >= FAILURE_THRESHOLD) {
                     console.log(`Instance ${instance.instanceName} failed ${FAILURE_THRESHOLD} times, switching instance.`);
